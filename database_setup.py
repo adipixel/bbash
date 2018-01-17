@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 
 
+
 Base = declarative_base()
 
 
@@ -17,45 +18,35 @@ class User(Base):
     email = Column(String(250), nullable=False)
     picture = Column(String(500))
 
-
-class Category(Base):
-    __tablename__ = 'category'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User)
-    item = relationship('Item', cascade='all, delete-orphan')
-
     @property
     def serialize(self):
         return {
             'name': self.name,
+            'email': self.email,
         }
 
+class Association(Base):
+    __tablename__ = 'association'
 
-class Item(Base):
-    __tablename__ = 'item'
-
-    name = Column(String(80), nullable=False)
     id = Column(Integer, primary_key=True)
-    description = Column(String(1000))
-    image = Column(String(500))
-    category_id = Column(Integer, ForeignKey('category.id'))
-    category = relationship(Category)
     user_id = Column(Integer, ForeignKey('user.id'))
+    friend_id = Column(Integer)
+    confirmed = Column(Integer)
     user = relationship(User)
 
     @property
     def serialize(self):
         return {
-            'name': self.name,
-            'description': self.description,
-            'image': self.image
+            'user_id': self.user_id,
+            'friend_id': self.friend_id,
+            'confirmed': self.confirmed,
         }
 
 
-engine = create_engine('sqlite:///catalog.db')
+
+
+
+engine = create_engine('postgresql://birthdaybash:birthdaybash@localhost:5432/bbash')
 
 
 Base.metadata.create_all(engine)
