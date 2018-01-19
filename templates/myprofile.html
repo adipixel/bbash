@@ -10,12 +10,28 @@
 		<h3>{{ user.name }}</h3>
 		<p>{{user.email}}</p>
 		<p>{{user.dob}}</p>
+		<a href="/gdisconnect">Logout</a>
 
-		<h3>Search Friends</h3>
+		<h3>Friends</h3>
+		<ul>
+			{% for friend in friendList %}
+			<li><a href="/profile/{{friend.id}}">{{ friend.name }}</a></li>
+			{% endfor %}
+		</ul>
+
+
+		<h3>Search People</h3>
 		<form action="/search" method="POST">
 			<input type="text" name="search_text">
 			<input class="btn btn-primary" type="submit" value="Search">
 		</form>
+
+		<p>Search Results</p>
+		<ul>
+			{% for person in people %}
+			<li><a href="/profile/{{person.id}}">{{ person.name }}</a></li>
+			{% endfor %}
+		</ul>
 	</div>
 
 

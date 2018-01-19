@@ -3,7 +3,7 @@ from flask import redirect, jsonify, url_for, flash
 
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, User
+from database_setup import Base, User, Association
 
 from flask import session as login_session
 import random
@@ -163,7 +163,7 @@ def gdisconnect():
         del login_session['email']
         del login_session['picture']
         del login_session['user_id']
-        return redirect(url_for('showCategories'))
+        return redirect(url_for('login'))
     else:
         response = make_response(
             json.dumps(
@@ -203,19 +203,19 @@ def getUserID(email):
 # delete - DELETE
 # create - POST
 
-@app.route('/profile/create', methods=['GET', 'POST'])
-def craeteUserProfile():
+@app.route('/profile/update', methods=['GET', 'POST'])
+def updateUserProfile():
+    user = getUserInfo(login_session['user_id'])
     if request.method == 'GET':
-        return render_template("createUserWiz.html")
+        return render_template("createUserWiz.html", user=user)
     elif request.method == 'POST':
-        user = User(
-            name=request.form['name'],
-            email=request.form['email'],
-            dob=request.form['dob']
-            )
-        session.add(user)
+        user.name=request.form['name']
+        user.email=request.form['email']
+        user.dob=str(request.form['dob'])
+        user.picture=request.form['picture']
+
         session.commit()
-        return redirect(url_for('getUsers'))
+        return redirect(url_for('myProfile'))
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -229,12 +229,19 @@ def login():
         return render_template("login.html")
 
 
-
-
 @app.route('/users')
 def getUsers():
     user = session.query(User).all()
     return jsonify(users=[i.serialize for i in user])
+
+@app.route('/friends')
+def getFriends():
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    friends = session.query(Association).filter_by(user_id=user.id).all()
+    return jsonify(friends=[i.serialize for i in friends])
+
+
+
 
 @app.route('/profile/<int:id>/')
 def viewProfile(id):
@@ -244,7 +251,24 @@ def viewProfile(id):
 @app.route('/profile/')
 def myProfile():
     user = session.query(User).filter_by(email=login_session['email']).one()
-    return render_template("myprofile.html", user=user)
+    people = session.query(User).all()
+    friend_ids = session.query(Association).filter_by(user_id=user.id).all()
+    friendList = []
+    for f_id in friend_ids:
+        friendList.append(session.query(User).filter_by(id=f_id.friend_id).one())
+
+    return render_template("myprofile.html", user=user, people=people, friendList=friendList)
+
+@app.route('/friendRequest/<int:id>', methods=['GET', 'POST'])
+def addFriend(id):
+    if request.method == 'POST':
+        friend = session.query(User).filter_by(id=id).one()
+        curUser = session.query(User).filter_by(email=login_session['email']).one()
+        association = Association(user_id=curUser.id, friend_id=friend.id, confirmed=1)
+        session.add(association)
+        session.commit()
+        return redirect(url_for('myProfile'))
+
 
 
 @app.route('/')

@@ -11,7 +11,9 @@
 		<p>{{user.email}}</p>
 		<p>{{user.dob}}</p>
 
-		<form action="/friendRequest/"></form>
+		<form action="/friendRequest/{{user.id}}" method="POST">
+			<input type="submit" name="" value="Add as friend">
+		</form>
 	</div>
 
 

@@ -7,15 +7,17 @@
 <body>
 
 	<div class="container">
-		<h3> Create Profile</h3>
-		<form class="form" method="POST" action="/profile/create">
+		<h3> Update Profile</h3>
+		<form class="form" method="POST" action="/profile/update">
 			<label>Name</label>
-			<input type="text" name="name">
+			<input type="text" name="name" value="{{ user.name }}">
 			<label>Email</label>
-			<input type="email" name="email">
+			<input type="email" name="email" value="{{user.email}}">
 			<label>Birthdate</label>
-			<input type="date" name="dob">
-			<input class="btn btn-primary" type="submit" name="submit" value="Create profile">
+			<input type="date" name="dob" value="{{ user.dob }}">
+			<label>Picture</label>
+			<input type="text" name="picture" value="{{user.picture}}">
+			<input class="btn btn-primary" type="submit" name="submit" value="Save">
 		</form>
 	</div>
 
