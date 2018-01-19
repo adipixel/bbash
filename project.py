@@ -245,8 +245,15 @@ def getFriends():
 
 @app.route('/profile/<int:id>/')
 def viewProfile(id):
-    user = session.query(User).filter_by(id=int(id)).one()
-    return render_template("profile.html", user=user)
+    logged_user = getUserInfo(login_session['user_id'])
+    friend = session.query(User).filter_by(id=id).one()
+    try:
+        association = session.query(Association).filter_by(user_id=logged_user.id, friend_id=friend.id).one()
+        if association:
+            return render_template("friend_profile.html", user=friend)
+    except:
+        pass
+    return render_template("public_profile.html", user=friend)
 
 @app.route('/profile/')
 def myProfile():
@@ -267,8 +274,17 @@ def addFriend(id):
         association = Association(user_id=curUser.id, friend_id=friend.id, confirmed=1)
         session.add(association)
         session.commit()
-        return redirect(url_for('myProfile'))
+        return redirect(url_for('viewProfile', id=id))
 
+@app.route('/unfriend/<int:id>', methods=['GET', 'POST'])
+def removeFriend(id):
+    if request.method == 'POST':
+        friend = session.query(User).filter_by(id=id).one()
+        logged_user = getUserInfo(login_session['user_id'])
+        association = session.query(Association).filter_by(user_id = logged_user.id, friend_id=friend.id).one()
+        session.delete(association)
+        session.commit()
+        return redirect(url_for('viewProfile', id=id))
 
 
 @app.route('/')
