@@ -1,49 +1,37 @@
 {% extends "main.html" %}
 {% block content %}
-    <main role="main">
-
-<!--       <section class="jumbotron text-center">
-        <div class="container">
-          <h1 class="jumbotron-heading">Album example</h1>
-          <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don't simply skip over it entirely.</p>
-          <p>
-            <a href="#" class="btn btn-primary my-2">Main call to action</a>
-            <a href="#" class="btn btn-secondary my-2">Secondary action</a>
-          </p>
-        </div>
-      </section> -->
-
-
-      	<div class="container">
-      		<img src="{{logged_user.picture}}" width="250" alt="Profile picture" class="img-thumbnail">
-			<h3>{{ logged_user.name }}</h3>
-			<p>{{logged_user.email}}</p>
-			<p>{{logged_user.dob}}</p>
-
-			<a href="/gdisconnect">Logout</a>
-
-			<h3>Friends</h3>
-			<ul>
-				{% for friend in friendList %}
-				<li><a href="/profile/{{friend.id}}">{{ friend.name }}</a></li>
+<main role="main" class="row">
+	<div class="col-md-3 bg-light sidebar">
+        <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+            	<li class="nav-item">
+            		<img src="{{logged_user.picture}}" width="" alt="Profile picture" class="img-thumbnail">
+            		<div class="nav-link">
+						<h5>{{ logged_user.name }} <small><a href="/profile/update"> Edit</a></small></h5>
+						<small>{{logged_user.email}}</small>
+						<p>{{logged_user.dob}}</p>
+					</div>
+            	</li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Friends</span>
+              <a class="d-flex align-items-center text-muted" href="#">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+            	{% for friend in friendList %}
+				<li class="nav-item m-0"><a class="nav-link" href="/profile/{{friend.id}}">{{ friend.name }}</a></li>
 				{% endfor %}
-			</ul>
+            </ul>
 
+          </div>
+    </div>
 
-			<h3>Search People</h3>
-			<form action="/search" method="POST">
-				<input type="text" name="search_text">
-				<input class="btn btn-primary" type="submit" value="Search">
-			</form>
+    <div class="col-md-5 middle-part">
 
-			<p>Search Results</p>
-			<ul>
-				{% for person in people %}
-				<li><a href="/profile/{{person.id}}">{{ person.name }}</a></li>
-				{% endfor %}
-			</ul>
-		</div>
+	</div>
 
-    </main>
+</main>
 
 {% endblock %}

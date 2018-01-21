@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+{% block content %}
+    <main role="main">
+      	<div class="container">
+      		<h4>Search Results</h4>
+			<ul>
+				{% for person in people %}
+				<li><a href="/profile/{{person.id}}">{{ person.name }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+
+    </main>
+
+{% endblock %}

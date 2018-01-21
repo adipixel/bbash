@@ -205,14 +205,14 @@ def getUserID(email):
 
 @app.route('/profile/update', methods=['GET', 'POST'])
 def updateUserProfile():
-    user = getUserInfo(login_session['user_id'])
+    logged_user = getUserInfo(login_session['user_id'])
     if request.method == 'GET':
-        return render_template("createUserWiz.html", user=user)
+        return render_template("createUserWiz.html", logged_user=logged_user)
     elif request.method == 'POST':
-        user.name=request.form['name']
-        user.email=request.form['email']
-        user.dob=str(request.form['dob'])
-        user.picture=request.form['picture']
+        logged_user.name=request.form['name']
+        logged_user.email=request.form['email']
+        logged_user.dob=str(request.form['dob'])
+        logged_user.picture=request.form['picture']
 
         session.commit()
         return redirect(url_for('myProfile'))
@@ -250,10 +250,10 @@ def viewProfile(id):
     try:
         association = session.query(Association).filter_by(user_id=logged_user.id, friend_id=friend.id).one()
         if association:
-            return render_template("friend_profile.html", user=friend)
+            return render_template("friend_profile.html", logged_user=logged_user, user=friend)
     except:
         pass
-    return render_template("public_profile.html", user=friend)
+    return render_template("public_profile.html", logged_user=logged_user, user=friend)
 
 @app.route('/profile/')
 def myProfile():
@@ -286,6 +286,17 @@ def removeFriend(id):
         session.commit()
         return redirect(url_for('viewProfile', id=id))
 
+
+@app.route('/search')
+def search():
+    logged_user = getUserInfo(login_session['user_id'])
+    people = session.query(User).all()
+    friend_ids = session.query(Association).filter_by(user_id=logged_user.id).all()
+    friendList = []
+    for f_id in friend_ids:
+        friendList.append(session.query(User).filter_by(id=f_id.friend_id).one())
+
+    return render_template("search_results.html", logged_user=logged_user, people=people, friendList=friendList)
 
 @app.route('/')
 def index():
