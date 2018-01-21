@@ -264,7 +264,7 @@ def myProfile():
     for f_id in friend_ids:
         friendList.append(session.query(User).filter_by(id=f_id.friend_id).one())
 
-    return render_template("myprofile.html", user=user, people=people, friendList=friendList)
+    return render_template("myprofile.html", logged_user=user, people=people, friendList=friendList)
 
 @app.route('/friendRequest/<int:id>', methods=['GET', 'POST'])
 def addFriend(id):

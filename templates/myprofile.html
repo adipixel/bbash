@@ -1,39 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>My Profile</title>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
-</head>
-<body>
+{% extends "main.html" %}
+{% block content %}
+    <main role="main">
 
-	<div class="container">
-		<h3>{{ user.name }}</h3>
-		<p>{{user.email}}</p>
-		<p>{{user.dob}}</p>
-		<a href="/gdisconnect">Logout</a>
-
-		<h3>Friends</h3>
-		<ul>
-			{% for friend in friendList %}
-			<li><a href="/profile/{{friend.id}}">{{ friend.name }}</a></li>
-			{% endfor %}
-		</ul>
+<!--       <section class="jumbotron text-center">
+        <div class="container">
+          <h1 class="jumbotron-heading">Album example</h1>
+          <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don't simply skip over it entirely.</p>
+          <p>
+            <a href="#" class="btn btn-primary my-2">Main call to action</a>
+            <a href="#" class="btn btn-secondary my-2">Secondary action</a>
+          </p>
+        </div>
+      </section> -->
 
 
-		<h3>Search People</h3>
-		<form action="/search" method="POST">
-			<input type="text" name="search_text">
-			<input class="btn btn-primary" type="submit" value="Search">
-		</form>
+      	<div class="container">
+      		<img src="{{logged_user.picture}}" width="250" alt="Profile picture" class="img-thumbnail">
+			<h3>{{ logged_user.name }}</h3>
+			<p>{{logged_user.email}}</p>
+			<p>{{logged_user.dob}}</p>
 
-		<p>Search Results</p>
-		<ul>
-			{% for person in people %}
-			<li><a href="/profile/{{person.id}}">{{ person.name }}</a></li>
-			{% endfor %}
-		</ul>
-	</div>
+			<a href="/gdisconnect">Logout</a>
+
+			<h3>Friends</h3>
+			<ul>
+				{% for friend in friendList %}
+				<li><a href="/profile/{{friend.id}}">{{ friend.name }}</a></li>
+				{% endfor %}
+			</ul>
 
 
-</body>
-</html>
+			<h3>Search People</h3>
+			<form action="/search" method="POST">
+				<input type="text" name="search_text">
+				<input class="btn btn-primary" type="submit" value="Search">
+			</form>
+
+			<p>Search Results</p>
+			<ul>
+				{% for person in people %}
+				<li><a href="/profile/{{person.id}}">{{ person.name }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+
+    </main>
+
+{% endblock %}
