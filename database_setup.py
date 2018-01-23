@@ -49,6 +49,7 @@ class Event(Base):
     __tablename__ = 'event'
 
     id = Column(Integer, primary_key=True)
+    description = Column(String(1000), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     co_user_id = Column(Integer)
     type = Column(String(50), nullable=False)
@@ -62,7 +63,92 @@ class Event(Base):
             'co_user_id': self.co_user_id,
             'type': self.type,
             'year': self.year,
+            'description': self.description,
         }
+
+
+class Media(Base):
+    __tablename__ = 'media'
+
+    id = Column(Integer, primary_key=True)
+    event_id = Column(Integer, ForeignKey('event.id'))
+    event = relationship(Event)
+    url = Column(String(500), nullable=False)
+    type = Column(String(50), nullable=False)
+
+    @property
+    def serialize(self):
+        return {
+            'event_id': self.event_id,
+            'url': self.url,
+        }
+
+
+class Comment(Base):
+    __tablename__ = 'comment'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, nullable=False)
+    media_id = Column(Integer, ForeignKey('media.id'))
+    media = relationship(Media)
+    dateTime = Column(DateTime)
+    text = Column(String(1000))
+
+    @property
+    def serialize(self):
+        return {
+            'media_id': self.media_id,
+            'dateTime': self.dateTime,
+            'user_id': self.user_id,
+            'text': self.text,
+        }
+
+
+class Like(Base):
+    __tablename__ = 'Like'
+
+    id = Column(Integer, primary_key=True)
+    media_id = Column(Integer, ForeignKey('media.id'))
+    media = relationship(Media)
+    dateTime = Column(DateTime)
+    user_id = Column(Integer, nullable=False)
+
+    @property
+    def serialize(self):
+        return {
+            'media_id': self.media_id,
+            'dateTime': self.dateTime,
+            'user_id': self.user_id,
+        }
+
+
+class Wish(object):
+    __tablename__ = 'wish'
+
+    id = Column(Integer, primary_key=True)
+    event_id = Column(Integer, ForeignKey('event.id'))
+    event = relationship(Event)
+    text = Column(String(5000), nullable=False)
+    to_user_id = Column(Integer, ForeignKey('user.id'))
+    from_user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
+    media_id = Column(Integer, ForeignKey('media.id'))
+    media = relationship(Media)
+
+    @property
+    def serialize(self):
+        return {
+            'event_id': self.event_id,
+            'text': self.text,
+            'to_user_id': self.to_user_id,
+            'from_user_id': self.from_user_id,
+            'media_id': self.media_id,
+        }
+
+
+
+
+
 
 
 

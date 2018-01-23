@@ -3,11 +3,14 @@ from flask import redirect, jsonify, url_for, flash
 
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, User, Association, Event
+from database_setup import Base, User, Association, Event, Comment, Like
+from utilities import *
 
 from flask import session as login_session
 import random
 import string
+import os
+from werkzeug import secure_filename
 
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -17,6 +20,9 @@ from flask import make_response
 import requests
 
 app = Flask(__name__)
+
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.secret_key = '14MiIQMR30EnRkv4j-o2FdZd'
 
@@ -203,6 +209,25 @@ def getUserID(email):
 # delete - DELETE
 # create - POST
 
+@app.route('/profile/')
+def myProfile():
+    logged_user = getUserInfo(login_session['user_id'])
+    friend_ids = session.query(Association).filter_by(user_id=logged_user.id).all()
+    friendList = []
+    for f_id in friend_ids:
+        friendList.append(session.query(User).filter_by(id=f_id.friend_id).one())
+    bdays = session.query(Event).filter_by(type='birthday', user_id=logged_user.id)
+    # birthdays = []
+    # for bday in bdays:
+    #     birthdays.append(Birthday(bday.id, bday.year, bday.description))
+
+    return render_template(
+        "myprofile.html",
+        logged_user=logged_user,
+        friendList=friendList,
+        birthdays=bdays
+        )
+
 @app.route('/profile/update', methods=['GET', 'POST'])
 def updateUserProfile():
     logged_user = getUserInfo(login_session['user_id'])
@@ -259,23 +284,6 @@ def viewProfile(id):
         pass
     return render_template("public_profile.html", logged_user=logged_user, friend=friend)
 
-@app.route('/profile/')
-def myProfile():
-    logged_user = getUserInfo(login_session['user_id'])
-    people = session.query(User).all()
-    friend_ids = session.query(Association).filter_by(user_id=logged_user.id).all()
-    friendList = []
-    for f_id in friend_ids:
-        friendList.append(session.query(User).filter_by(id=f_id.friend_id).one())
-    birthdays = session.query(Event).filter_by(type='birthday', user_id=logged_user.id)
-
-    return render_template(
-        "myprofile.html",
-        logged_user=logged_user,
-        people=people,
-        friendList=friendList,
-        birthdays=birthdays
-        )
 
 @app.route('/friendRequest/<int:id>', methods=['GET', 'POST'])
 def addFriend(id):
@@ -322,11 +330,36 @@ def createEvent():
     if request.method == 'GET':
         return render_template("create_event.html", logged_user=logged_user)
     elif request.method == 'POST':
-        event = Event(user_id=logged_user.id, co_user_id='', type=request.form['type'], year=int(request.form['year']))
+        event = Event(
+            user_id=logged_user.id,
+            co_user_id='',
+            type=request.form['type'],
+            year=int(request.form['year']),
+            description=request.form['description']
+            )
         session.add(event)
         session.commit()
         return redirect(url_for('myProfile'))
 
+
+
+@app.route('/birthday/<int:user_id>/<int:bday_id>', methods=['GET', 'POST'])
+def updateEventData(user_id, bday_id):
+    logged_user = getUserInfo(login_session['user_id'])
+    if request.method == 'GET':
+        event = session.query(Event).filter_by(id=bday_id).one()
+        return render_template("add_data_to_event.html", logged_user=logged_user, event=event)
+
+@app.route('/uploadajax', methods = ['GET', 'POST'])
+def upload_file():
+   if request.method == 'POST':
+      f = request.files['file']
+      extention = "."+(f.filename.split('.')[-1])
+      f.filename = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))+extention
+      print f.filename
+      filename = secure_filename(f.filename)
+      f.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+      return 'file uploaded successfully'
 
 if __name__ == '__main__':
     app.debug = True

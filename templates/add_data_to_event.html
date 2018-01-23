@@ -1,0 +1,37 @@
+{% extends "main.html" %}
+{% block content %}
+<div id="fileupload">
+	<form id="upload-file" method="post" enctype="multipart/form-data">
+	    <fieldset>
+	        <label for="file">Select a file</label>
+	        <input id="filepath" name="file" type="file">
+	    </fieldset>
+	    <fieldset>
+	        <button id="upload-file-btn" type="button">Upload</button>
+	    </fieldset>
+	    <div id="fileuploadStatus"></div>
+	</form>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+	$(function() {
+	$('#upload-file-btn').click(function() {
+        var form_data = new FormData($('#upload-file')[0]);
+        $.ajax({
+            type: 'POST',
+            url: '/uploadajax',
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            async: false,
+            success: function(data) {
+                console.log('Success!');
+                $('#upload-file')[0].reset();
+                $('#fileuploadStatus').html(data);
+            },
+        });
+    });
+});
+</script>
+{% endblock %}

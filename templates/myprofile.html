@@ -30,9 +30,21 @@
 
     <div class="col-md-5 middle-part">
     	<a href="/create/event" class="btn btn-primary">Add Birthday</a>
-    	<ul>
+    	<div class="row birthday_card">
     		{% for bday in birthdays %}
-    		<li>{{bday.year}}</li>
+    		<div class="col-12">
+    			<div class="top">
+    				<div class="title"> <a href="/birthday/{{logged_user.id}}/{{bday.id}}">Birthday {{bday.year}}</a></div>
+    			</div>
+    			<div class="body">
+    				<div class="row">
+    					<div class="col-3">
+    						<img class="img-thumbnail" src="">
+    					</div>
+    				</div>
+    			</div>
+
+    		</div>
     		{% endfor %}
     	</ul>
 	</div>
