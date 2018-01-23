@@ -3,7 +3,7 @@ from flask import redirect, jsonify, url_for, flash
 
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, User, Association
+from database_setup import Base, User, Association, Event
 
 from flask import session as login_session
 import random
@@ -240,6 +240,10 @@ def getFriends():
     friends = session.query(Association).filter_by(user_id=user.id).all()
     return jsonify(friends=[i.serialize for i in friends])
 
+@app.route('/events')
+def getEvents():
+    events = session.query(Event).all()
+    return jsonify(events=[i.serialize for i in events])
 
 
 
@@ -250,21 +254,28 @@ def viewProfile(id):
     try:
         association = session.query(Association).filter_by(user_id=logged_user.id, friend_id=friend.id).one()
         if association:
-            return render_template("friend_profile.html", logged_user=logged_user, user=friend)
+            return render_template("friend_profile.html", logged_user=logged_user, friend=friend)
     except:
         pass
-    return render_template("public_profile.html", logged_user=logged_user, user=friend)
+    return render_template("public_profile.html", logged_user=logged_user, friend=friend)
 
 @app.route('/profile/')
 def myProfile():
-    user = session.query(User).filter_by(email=login_session['email']).one()
+    logged_user = getUserInfo(login_session['user_id'])
     people = session.query(User).all()
-    friend_ids = session.query(Association).filter_by(user_id=user.id).all()
+    friend_ids = session.query(Association).filter_by(user_id=logged_user.id).all()
     friendList = []
     for f_id in friend_ids:
         friendList.append(session.query(User).filter_by(id=f_id.friend_id).one())
+    birthdays = session.query(Event).filter_by(type='birthday', user_id=logged_user.id)
 
-    return render_template("myprofile.html", logged_user=user, people=people, friendList=friendList)
+    return render_template(
+        "myprofile.html",
+        logged_user=logged_user,
+        people=people,
+        friendList=friendList,
+        birthdays=birthdays
+        )
 
 @app.route('/friendRequest/<int:id>', methods=['GET', 'POST'])
 def addFriend(id):
@@ -301,6 +312,21 @@ def search():
 @app.route('/')
 def index():
     return '<a href="/users">get users</a>'
+
+
+
+# ----------------birthday----------------------
+@app.route('/create/event', methods=['GET', 'POST'])
+def createEvent():
+    logged_user = getUserInfo(login_session['user_id'])
+    if request.method == 'GET':
+        return render_template("create_event.html", logged_user=logged_user)
+    elif request.method == 'POST':
+        event = Event(user_id=logged_user.id, co_user_id='', type=request.form['type'], year=int(request.form['year']))
+        session.add(event)
+        session.commit()
+        return redirect(url_for('myProfile'))
+
 
 if __name__ == '__main__':
     app.debug = True

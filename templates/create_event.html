@@ -1,0 +1,47 @@
+{% extends "main.html" %}
+{% block content %}
+<main role="main" class="row">
+    <div class="col-md-3 bg-light sidebar">
+        <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <img src="{{logged_user.picture}}" width="" alt="Profile picture" class="img-thumbnail">
+                    <div class="nav-link">
+                        <h5>{{ logged_user.name }} <small><a href="/profile/update"> Edit</a></small></h5>
+                        <small>{{logged_user.email}}</small>
+                        <p>{{logged_user.dob}}</p>
+                    </div>
+                </li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Friends</span>
+              <a class="d-flex align-items-center text-muted" href="#">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+                {% for friend in friendList %}
+                <li class="nav-item m-0"><a class="nav-link" href="/profile/{{friend.id}}">{{ friend.name }}</a></li>
+                {% endfor %}
+            </ul>
+
+          </div>
+    </div>
+
+    <div class="col-md-9 middle-part">
+        <div class="row">
+            <form class="col-6 form" action="/create/event" method="POST">
+                <label>Type</label>
+                <select class="form-control" name="type">
+                    <option>birthday</option>
+                    <option>other</option>
+                </select>
+                <label>Year</label>
+                <input class="form-control" name="year" placeholder="year" />
+                <input class="form-control" type="submit" value="Create" />
+            </form>
+        </div>
+    </div>
+
+</main>
+{% endblock %}

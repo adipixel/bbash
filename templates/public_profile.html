@@ -1,11 +1,11 @@
 {% extends "main.html" %}
 {% block content %}
 	<div class="container">
-		<h3>{{ user.name }}</h3>
-		<p>{{user.email}}</p>
-		<p>{{user.dob}}</p>
+		<h3>{{ friend.name }}</h3>
+		<p>{{friend.email}}</p>
+		<p>{{friend.dob}}</p>
 
-		<form action="/friendRequest/{{user.id}}" method="POST">
+		<form action="/friendRequest/{{friend.id}}" method="POST">
 			<input type="submit" name="" value="Add as friend">
 		</form>
 

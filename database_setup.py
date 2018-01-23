@@ -16,7 +16,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     email = Column(String(250), nullable=False)
-    dob = Column(String(200))
+    dob = Column(String(50))
     picture = Column(String(500))
 
     @property
@@ -45,7 +45,24 @@ class Association(Base):
             'confirmed': self.confirmed,
         }
 
+class Event(Base):
+    __tablename__ = 'event'
 
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    co_user_id = Column(Integer)
+    type = Column(String(50), nullable=False)
+    year = Column(Integer)
+    user = relationship(User)
+
+    @property
+    def serialize(self):
+        return {
+            'user_id': self.user_id,
+            'co_user_id': self.co_user_id,
+            'type': self.type,
+            'year': self.year,
+        }
 
 
 

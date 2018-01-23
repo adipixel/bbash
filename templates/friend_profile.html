@@ -1,15 +1,35 @@
 {% extends "main.html" %}
 {% block content %}
 
-	<div class="container">
-		<h3>{{ user.name }}</h3>
-		<p>{{user.email}}</p>
-		<p>{{user.dob}}</p>
+	<div class="row">
+		<div class="col-md-4 bg-light sidebar">
+        <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+            	<li class="nav-item">
+            		<img src="{{friend.picture}}" width="" alt="Profile picture" class="img-thumbnail">
+            		<div class="nav-link">
+						<h5>{{ friend.name }}</h5>
+						<small>{{friend.email}}</small>
+						<p>{{friend.dob}}</p>
+					</div>
+					<form action="/unfriend/{{friend.id}}" method="POST">
+						<input type="submit" name="" value="Unfriend">
+					</form>
+            	</li>
+            </ul>
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span>Media</span>
+              <a class="d-flex align-items-center text-muted" href="#">
+                <span data-feather="plus-circle"></span>
+              </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+            	<!-- images	 -->
+            </ul>
 
-		<form action="/unfriend/{{user.id}}" method="POST">
-			<input type="submit" name="" value="Unfriend">
-		</form>
+          </div>
+    </div>
 
-	</div>
+    <div class="col-md-5 middle-part">
 
 {% endblock %}
