@@ -1,5 +1,14 @@
 {% extends "main.html" %}
 {% block content %}
+<h5>Birthday {{event.year}}</h5>
+<div id="addDesc">
+	<form id="update-desc" class="form" method="POST">
+		<label>Description</label>
+		<input class="form-control" type="text" name="desc" value="{{event.description}}">
+		<button id="update-desc-btn" type="button">Save</button>
+		<div id="descStatus"></div>
+	</form>
+</div>
 <div id="fileupload">
 	<form id="upload-file" method="post" enctype="multipart/form-data">
 	    <fieldset>
@@ -16,10 +25,11 @@
 <script>
 	$(function() {
 	$('#upload-file-btn').click(function() {
+
         var form_data = new FormData($('#upload-file')[0]);
         $.ajax({
             type: 'POST',
-            url: '/uploadajax',
+            url: '/uploadajax/{{logged_user.id}}/{{event.id}}',
             data: form_data,
             contentType: false,
             cache: false,
@@ -32,6 +42,26 @@
             },
         });
     });
+    $('#update-desc-btn').click(function() {
+
+        var form_data = new FormData($('#update-desc')[0]);
+        $.ajax({
+            type: 'POST',
+            url: '/birthday/update_desc/{{event.id}}',
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            async: false,
+            success: function(data) {
+                console.log('Success!');
+                $('#descStatus').html(data);
+            },
+        });
+    });
 });
+	  $("#form").submit( function(eventObj) {
+
+	  });
 </script>
 {% endblock %}

@@ -81,6 +81,7 @@ class Media(Base):
         return {
             'event_id': self.event_id,
             'url': self.url,
+            'type': self.type,
         }
 
 

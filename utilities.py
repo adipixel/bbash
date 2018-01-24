@@ -13,10 +13,11 @@ session = DBSession()
 
 class Birthday(object):
 	"""stores a birthday object"""
+	event_id = None
 	photos = []
 	videos = []
 	description = ""
-	year = ""
+	year = 0
 
 	def __init__(self, event_id, year, description):
 		#super(Birthday, self).__init__()

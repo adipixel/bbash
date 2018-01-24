@@ -10,7 +10,7 @@
             		<div class="nav-link">
 						<h5>{{ friend.name }}</h5>
 						<small>{{friend.email}}</small>
-						<p>{{friend.dob}}</p>
+						<p></p>
 					</div>
 					<form action="/unfriend/{{friend.id}}" method="POST">
 						<input type="submit" name="" value="Unfriend">
@@ -31,5 +31,40 @@
     </div>
 
     <div class="col-md-5 middle-part">
+      <div class="row">
+        <div class="col-12 p-0 m-1">
+          <div class="top m-0">
+            background
+          </div>
+          <div class="body">
+            <h2>{{friend.dob}}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="row birthday_card ">
+        {% for bday in birthdays %}
+        <div class="col-12 p-0 m-1 bbash-card">
+          <div class="top p-1">
+            <div class="title"> <a href="">Birthday {{bday.year}}</a></div>
+          </div>
+          <div class="body px-2">
+            <div class="row">
+              <div class="col-12">
+                <p>{{bday.description}}</p>
+              </div>
+            </div>
+            <div class="row">
+              {% for photo in bday.photos %}
+              <div class="col-3">
+                <img class="img-thumbnail m-0 p-0" src="/static/uploads/{{photo.url}}" alt="{{photo.url}}">
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+        {% endfor %}
+      </div>
+    </div>
 
 {% endblock %}

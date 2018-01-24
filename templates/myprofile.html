@@ -30,23 +30,30 @@
 
     <div class="col-md-5 middle-part">
     	<a href="/create/event" class="btn btn-primary">Add Birthday</a>
-    	<div class="row birthday_card">
+    	<div class="row birthday_card ">
     		{% for bday in birthdays %}
-    		<div class="col-12">
-    			<div class="top">
-    				<div class="title"> <a href="/birthday/{{logged_user.id}}/{{bday.id}}">Birthday {{bday.year}}</a></div>
+    		<div class="col-12 p-0 m-1 bbash-card">
+    			<div class="top p-1">
+    				<div class="title"> <a href="">Birthday {{bday.year}}</a><a class="btn btn-outline-secondary btn-sm px-2 py-0" href="/birthday/{{logged_user.id}}/{{bday.id}}" style="float: right">Edit</a> </div>
     			</div>
-    			<div class="body">
+    			<div class="body px-2">
     				<div class="row">
-    					<div class="col-3">
-    						<img class="img-thumbnail" src="">
+    					<div class="col-12">
+    						<p>{{bday.description}}</p>
     					</div>
+    				</div>
+    				<div class="row">
+    					{% for photo in bday.photos %}
+    					<div class="col-3">
+    						<img class="img-thumbnail m-0 p-0" src="/static/uploads/{{photo.url}}" alt="{{photo.url}}">
+    					</div>
+    					{% endfor %}
     				</div>
     			</div>
 
     		</div>
     		{% endfor %}
-    	</ul>
+    	</div>
 	</div>
 
 </main>

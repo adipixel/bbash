@@ -21,7 +21,7 @@ import requests
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.secret_key = '14MiIQMR30EnRkv4j-o2FdZd'
@@ -212,21 +212,30 @@ def getUserID(email):
 @app.route('/profile/')
 def myProfile():
     logged_user = getUserInfo(login_session['user_id'])
-    friend_ids = session.query(Association).filter_by(user_id=logged_user.id).all()
+    friend_ids = session.query(Association).filter_by(user_id=logged_user.id, confirmed=1).all()
     friendList = []
     for f_id in friend_ids:
         friendList.append(session.query(User).filter_by(id=f_id.friend_id).one())
     bdays = session.query(Event).filter_by(type='birthday', user_id=logged_user.id)
-    # birthdays = []
-    # for bday in bdays:
-    #     birthdays.append(Birthday(bday.id, bday.year, bday.description))
+    birthdays = []
+    for bday in bdays:
+        photos = session.query(Media).filter_by(event_id=bday.id, type='photo').all()
+        birthdays.append({'id': bday.id, 'year': bday.year, 'description': bday.description, 'photos': photos})
+
+    friend_requests = []
+    friend_requests = session.query(Association).filter_by(friend_id=logged_user.id, confirmed=0).all()
+    requests = []
+    for fr in friend_requests:
+        requests.append(session.query(User).filter_by(id=fr.user_id).one())
 
     return render_template(
         "myprofile.html",
         logged_user=logged_user,
         friendList=friendList,
-        birthdays=bdays
+        birthdays=birthdays,
+        requests = requests
         )
+
 
 @app.route('/profile/update', methods=['GET', 'POST'])
 def updateUserProfile():
@@ -261,7 +270,7 @@ def getUsers():
 
 @app.route('/friends')
 def getFriends():
-    user = session.query(User).filter_by(email=login_session['email']).one()
+    user = getUserInfo(login_session['user_id'])
     friends = session.query(Association).filter_by(user_id=user.id).all()
     return jsonify(friends=[i.serialize for i in friends])
 
@@ -270,6 +279,11 @@ def getEvents():
     events = session.query(Event).all()
     return jsonify(events=[i.serialize for i in events])
 
+@app.route('/media')
+def getMedia():
+    media = session.query(Media).all()
+    return jsonify(events=[i.serialize for i in media])
+
 
 
 @app.route('/profile/<int:id>/')
@@ -277,22 +291,38 @@ def viewProfile(id):
     logged_user = getUserInfo(login_session['user_id'])
     friend = session.query(User).filter_by(id=id).one()
     try:
-        association = session.query(Association).filter_by(user_id=logged_user.id, friend_id=friend.id).one()
+        association = session.query(Association).filter_by(user_id=logged_user.id, friend_id=friend.id, confirmed=1).one()
         if association:
-            return render_template("friend_profile.html", logged_user=logged_user, friend=friend)
+            bdays = session.query(Event).filter_by(type='birthday', user_id=friend.id)
+            birthdays = []
+            for bday in bdays:
+                photos = session.query(Media).filter_by(event_id=bday.id, type='photo').all()
+                birthdays.append({'id': bday.id, 'year': bday.year, 'description': bday.description, 'photos': photos})
+            return render_template(
+                "friend_profile.html",
+                logged_user=logged_user,
+                friend=friend,
+                birthdays=birthdays)
     except:
         pass
     return render_template("public_profile.html", logged_user=logged_user, friend=friend)
 
-
+# ---------------------------- friend request -----------------------
 @app.route('/friendRequest/<int:id>', methods=['GET', 'POST'])
 def addFriend(id):
     if request.method == 'POST':
         friend = session.query(User).filter_by(id=id).one()
-        curUser = session.query(User).filter_by(email=login_session['email']).one()
-        association = Association(user_id=curUser.id, friend_id=friend.id, confirmed=1)
+        logged_user = getUserInfo(login_session['user_id'])
+        try:
+            if session.query(Association).filter_by(user_id=logged_user.id, friend_id=friend.id, confirmed=0).one():
+                return 'request already sent'
+        except Exception as e:
+            pass
+
+        association = Association(user_id=logged_user.id, friend_id=friend.id, confirmed=0)
         session.add(association)
         session.commit()
+        print "request sent"
         return redirect(url_for('viewProfile', id=id))
 
 @app.route('/unfriend/<int:id>', methods=['GET', 'POST'])
@@ -303,9 +333,37 @@ def removeFriend(id):
         association = session.query(Association).filter_by(user_id = logged_user.id, friend_id=friend.id).one()
         session.delete(association)
         session.commit()
+        friend_association = session.query(Association).filter_by(user_id = friend.id, friend_id=logged_user.id).one()
+        session.delete(friend_association)
+        session.commit()
+        return redirect(url_for('viewProfile', id=id))
+
+@app.route('/accept/<int:id>', methods=['GET', 'POST'])
+def acceptFriend(id):
+    if request.method == 'GET':
+        friend = session.query(User).filter_by(id=id).one()
+        logged_user = getUserInfo(login_session['user_id'])
+        association = session.query(Association).filter_by(user_id = friend.id, friend_id=logged_user.id).one()
+        association.confirmed = 1
+        session.commit()
+        newAssociation = Association(user_id=logged_user.id, friend_id=friend.id, confirmed=1)
+        session.add(newAssociation)
+        session.commit()
         return redirect(url_for('viewProfile', id=id))
 
 
+@app.route('/decline/<int:id>', methods=['GET', 'POST'])
+def declineFriend(id):
+    if request.method == 'GET':
+        friend = session.query(User).filter_by(id=id).one()
+        logged_user = getUserInfo(login_session['user_id'])
+        association = session.query(Association).filter_by(user_id=friend.id, friend_id=logged_user.id, confirmed=0).one()
+        session.delete(association)
+        session.commit()
+        return redirect(url_for('myProfile'))
+
+
+# -----------------------search-------------------------------
 @app.route('/search')
 def search():
     logged_user = getUserInfo(login_session['user_id'])
@@ -350,16 +408,30 @@ def updateEventData(user_id, bday_id):
         event = session.query(Event).filter_by(id=bday_id).one()
         return render_template("add_data_to_event.html", logged_user=logged_user, event=event)
 
-@app.route('/uploadajax', methods = ['GET', 'POST'])
-def upload_file():
+
+@app.route('/uploadajax/<int:user_id>/<int:event_id>', methods = ['GET', 'POST'])
+def upload_file(user_id, event_id):
    if request.method == 'POST':
-      f = request.files['file']
-      extention = "."+(f.filename.split('.')[-1])
-      f.filename = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))+extention
-      print f.filename
-      filename = secure_filename(f.filename)
-      f.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-      return 'file uploaded successfully'
+          f = request.files['file']
+          if f:
+              extention = "."+(f.filename.split('.')[-1])
+              f.filename = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))+extention
+              print f.filename
+              filename = secure_filename(f.filename)
+              f.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+              media = Media(event_id=event_id, type='photo', url=filename)
+              session.add(media)
+              session.commit()
+              return 'file uploaded successfully!'
+
+@app.route('/birthday/update_desc/<int:event_id>', methods = ['GET', 'POST'])
+def updateEventDesc(event_id):
+   if request.method == 'POST':
+          event = session.query(Event).filter_by(id=event_id).one()
+          event.description = request.form['desc']
+          session.commit()
+          return "Saved!"
+
 
 if __name__ == '__main__':
     app.debug = True
