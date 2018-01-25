@@ -2,7 +2,7 @@
 {% block content %}
 
 	<div class="row">
-		<div class="col-md-4 bg-light sidebar">
+		<div class="col-md-3 bg-light sidebar">
         <div class="sidebar-sticky">
             <ul class="nav flex-column">
             	<li class="nav-item">
@@ -30,14 +30,15 @@
           </div>
     </div>
 
-    <div class="col-md-5 middle-part">
+    <div class="col-md-6 middle-part">
       <div class="row">
-        <div class="col-12 p-0 m-1">
+        <div class="col-12 bday_banner bbash-card p-0 m-1">
           <div class="top m-0">
-            background
+
           </div>
-          <div class="body">
-            <h2>{{friend.dob}}</h2>
+          <div class="body px-2 py-5">
+            <h2 id="bday-text"></h2>
+            <h5 id="days-left" class="text-danger"></h5>
           </div>
         </div>
       </div>
@@ -47,7 +48,7 @@
           <div class="top p-1">
             <div class="title"> <a href="">Birthday {{bday.year}}</a></div>
           </div>
-          <div class="body px-2">
+          <div class="body p-1">
             <div class="row">
               <div class="col-12">
                 <p>{{bday.description}}</p>
@@ -56,7 +57,7 @@
             <div class="row">
               {% for photo in bday.photos %}
               <div class="col-3">
-                <img class="img-thumbnail m-0 p-0" src="/static/uploads/{{photo.url}}" alt="{{photo.url}}">
+                <img class="img-thumbnail m-0 p-0 rounded-0" src="/static/uploads/{{photo.url}}" alt="{{photo.url}}">
               </div>
               {% endfor %}
             </div>
@@ -66,5 +67,35 @@
         {% endfor %}
       </div>
     </div>
+
+
+<script>
+  $(function(){
+    var date = "{{friend.dob}}";
+    console.log(date);
+    months = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    splitDate = date.split("-");
+    $('#bday-text').html(months[parseInt(splitDate[1])]+" "+splitDate[2]);
+
+    var oneDay = 24*60*60*1000; // hours*minutes*seconds*milliseconds
+    var temp = new Date();
+
+    var firstDate =  new Date(temp.getFullYear(), parseInt(splitDate[1])-1, parseInt(splitDate[2]));
+    var secondDate = new Date(temp.getFullYear(), temp.getMonth(), temp.getDate());
+    if (firstDate < secondDate){
+      firstDate =  new Date(temp.getFullYear()+1, parseInt(splitDate[1])-1, parseInt(splitDate[2]));
+    }
+    console.log(firstDate);
+    console.log(secondDate);
+    console.log(parseInt(splitDate[1]));
+
+    var diffDays = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime())/(oneDay)));
+    unit = "days";
+    if (diffDays==1){
+      unit = "day";
+    }
+    $('#days-left').html("<strong>"+diffDays+" "+unit+" left </strong>");
+  });
+</script>
 
 {% endblock %}

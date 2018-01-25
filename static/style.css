@@ -57,3 +57,12 @@ body{
 .bbash-card .top {
     background-color: #f5f5f5;
 }
+
+.bday_banner .top{
+  background-image: url('images/banner_strip.png');
+  height: 10px;
+  background-size: 100%;
+}
+.bday_banner .body{
+
+}
